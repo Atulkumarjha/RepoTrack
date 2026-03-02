@@ -5,6 +5,8 @@ from datetime import datetime
 from app.db.collections import users_collection, repos_collection
 from app.core.config import settings 
 
+from app.core.deps import get_current_user
+
 router = APIRouter(prefix="/repos", tags=["Repositories"])
 
 @router.get("/github/{github_id}")

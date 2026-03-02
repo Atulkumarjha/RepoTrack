@@ -6,6 +6,8 @@ from datetime import datetime
 from app.core.config import settings
 from app.db.collections import users_collection
 
+from app.core.security import create_access_token
+
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.get("/github/login")
@@ -61,7 +63,13 @@ async def github_callback(code: str):
                 upsert=True,
             )
             
+            token = create_access_token({
+                "sub": str(github_user{"id"})
+            })
+            
             return {
+                "access_token": token,
+                "token_type": "bearer",
                 "message": "Login successful",
                 "username": github_user["login"],
             }
