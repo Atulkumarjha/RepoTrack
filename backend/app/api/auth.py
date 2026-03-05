@@ -64,7 +64,7 @@ async def github_callback(code: str):
             )
             
             token = create_access_token({
-                "sub": str(github_user{"id"})
+                "sub": str(github_user["id"])
             })
             
             return {

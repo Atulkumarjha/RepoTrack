@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app,core.deps import get_current_user
+from app.core.deps import get_current_user
 from app.db.collections import database
 router = APIRouter(prefix="/integrations", tags=["Integrations"])
 
