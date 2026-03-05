@@ -1,18 +1,33 @@
 from fastapi import WebSocket
-from typing import List
+from typing import Dict, List
 
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        # repo_id → list of sockets
+        self.repo_connections: Dict[str, List[WebSocket]] = {}
 
-        async def connect(self, websocket: WebSocket):
-            await websocket.accept()
-            self.active_connections.append(websocket)
+    async def connect(self, websocket: WebSocket, repo_id: str):
+        await websocket.accept()
 
-            def disconnect(self, websocket: WebSocket):
-                self.active_connections.remove(websocket)
+        if repo_id not in self.repo_connections:
+            self.repo_connections[repo_id] = []
 
-        async def broadcast(self, message: dict):
-            for connection in self.active_connections:
-                await connection.send_json(message)
+        self.repo_connections[repo_id].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, repo_id: str):
+        if repo_id in self.repo_connections:
+            self.repo_connections[repo_id].remove(websocket)
+
+            if not self.repo_connections[repo_id]:
+                del self.repo_connections[repo_id]
+
+    async def broadcast_to_repo(self, repo_id: str, message: dict):
+        if repo_id not in self.repo_connections:
+            return
+
+        for connection in self.repo_connections[repo_id]:
+            await connection.send_json(message)
+
+
+manager = ConnectionManager()
