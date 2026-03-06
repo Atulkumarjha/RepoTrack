@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 import httpx
 from datetime import datetime 
@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.db.collections import users_collection
 
 from app.core.security import create_access_token
+from app.core.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -36,7 +37,7 @@ async def github_callback(code: str):
         token_data = token_response.json()
         access_token = token_data.get("access_token")
         if not access_token:
-            return {"error": "OAuth failed", "details": token_data}
+            return RedirectResponse(f"http://localhost:3000/login?error=oauth_failed")
         
         async with httpx.AsyncClient() as client:
             user_response = await client.get(
@@ -67,9 +68,20 @@ async def github_callback(code: str):
                 "sub": str(github_user["id"])
             })
             
-            return {
-                "access_token": token,
-                "token_type": "bearer",
-                "message": "Login successful",
-                "username": github_user["login"],
-            }
+            # Redirect to frontend callback with JWT token
+            return RedirectResponse(
+                f"http://localhost:3000/callback?token={token}&username={github_user['login']}"
+            )
+
+
+@router.get("/me")
+async def get_current_user_info(user_id: str = Depends(get_current_user)):
+    user = await users_collection.find_one({"github_id": int(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "github_id": user["github_id"],
+        "username": user["username"],
+        "avatar_url": user.get("avatar_url"),
+    }

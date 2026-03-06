@@ -10,7 +10,7 @@ async def send_slack_message(webhook_url: str, text: str):
         await client.post(webhook_url, json=payload)
         
         
-async def send_dscord_message(webhook_url: str, text: str):
+async def send_discord_message(webhook_url: str, text: str):
     
     payload = {
         "content": text

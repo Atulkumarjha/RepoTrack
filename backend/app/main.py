@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.auth import router as auth_router
 from app.api.repositories import router as repo_router
 from app.api.webhooks import router as webhook_router
@@ -9,6 +10,15 @@ from app.api.integrations import router as integrations_router
 
 
 app = FastAPI(title="RepoTrack API")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(repo_router)
