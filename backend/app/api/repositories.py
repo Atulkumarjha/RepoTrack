@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import httpx
 from datetime import datetime
 
@@ -59,35 +59,42 @@ async def create_github_webhook(user, repo_full_name: str):
             )
         
         return response.json()
+
+from pydantic import BaseModel
+
+class ConnectRepoRequest(BaseModel):
+    repo_id: int
+    name: str
+    full_name: str
+    owner: str
+
+@router.post("/connect")
+async def connect_repository(
+    body: ConnectRepoRequest,
+    user_id: str = Depends(get_current_user),
+):
     
-    @router.post("/connect") 
-    async def connect_repository(
-        github_id: int,
-        repo_id: int,
-        name: str,
-        full_name: str,
-        owner: str,
-    ):
-        
-        user = await users_collection.find_one({"github_id": github_id})
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        webhook = await create_github_webhook(user, full_name)
-        
-        repo_data = {
-            "repo_id": repo_id,
-            "name": name,
-            "full_name": full_name,
-            "owner": owner,
-            "user_id": user["_id"],
-            "webhook_id": webhook["id"],
-            "created_id": datetime.utcnow(),
-        }
-        
-        await repos_collection.insert_one(repo_data)
-        
-        return {
-            "message": "Repository connected successfully",
-            "repo": full_name,
-        }
+    user = await users_collection.find_one({"github_id": int(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create webhook (optional - comment out if not using webhooks locally)
+    # webhook = await create_github_webhook(user, body.full_name)
+    
+    repo_data = {
+        "repo_id": body.repo_id,
+        "name": body.name,
+        "full_name": body.full_name,
+        "owner": body.owner,
+        "user_id": user["_id"],
+        # "webhook_id": webhook["id"],
+        "created_at": datetime.utcnow(),
+    }
+    
+    result = await repos_collection.insert_one(repo_data)
+    
+    return {
+        "message": "Repository connected successfully",
+        "repo": body.full_name,
+        "repo_id": str(result.inserted_id),
+    }
