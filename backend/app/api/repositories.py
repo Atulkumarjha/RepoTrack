@@ -1,13 +1,21 @@
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 import httpx
 from datetime import datetime
 
 from app.db.collections import users_collection, repos_collection
-from app.core.config import settings 
+from app.core.config import settings
 
 from app.core.deps import get_current_user
 
 router = APIRouter(prefix="/repos", tags=["Repositories"])
+
+
+class ConnectRepoRequest(BaseModel):
+    repo_id: int
+    name: str
+    full_name: str
+    owner: str
 
 @router.get("/github/{github_id}")
 async def get_github_repos(github_id: int):
@@ -60,41 +68,81 @@ async def create_github_webhook(user, repo_full_name: str):
         
         return response.json()
 
-from pydantic import BaseModel
-
-class ConnectRepoRequest(BaseModel):
-    repo_id: int
-    name: str
-    full_name: str
-    owner: str
 
 @router.post("/connect")
 async def connect_repository(
     body: ConnectRepoRequest,
     user_id: str = Depends(get_current_user),
 ):
-    
     user = await users_collection.find_one({"github_id": int(user_id)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Create webhook (optional - comment out if not using webhooks locally)
-    # webhook = await create_github_webhook(user, body.full_name)
-    
+
+    # Prevent duplicate connections
+    existing = await repos_collection.find_one({
+        "full_name": body.full_name,
+        "user_id": user["_id"],
+    })
+    if existing:
+        return {
+            "message": "Repository already connected",
+            "repo": body.full_name,
+            "repo_id": str(existing["_id"]),
+        }
+
     repo_data = {
         "repo_id": body.repo_id,
         "name": body.name,
         "full_name": body.full_name,
         "owner": body.owner,
         "user_id": user["_id"],
-        # "webhook_id": webhook["id"],
         "created_at": datetime.utcnow(),
     }
-    
+
     result = await repos_collection.insert_one(repo_data)
-    
+
     return {
         "message": "Repository connected successfully",
         "repo": body.full_name,
         "repo_id": str(result.inserted_id),
     }
+
+
+@router.get("/tracked")
+async def get_tracked_repos(user_id: str = Depends(get_current_user)):
+    """Get all repositories the user has connected/tracked."""
+    user = await users_collection.find_one({"github_id": int(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    cursor = repos_collection.find({"user_id": user["_id"]})
+    repos = []
+    async for repo in cursor:
+        repo["_id"] = str(repo["_id"])
+        repo["user_id"] = str(repo["user_id"])
+        repos.append(repo)
+
+    return repos
+
+
+@router.delete("/disconnect/{repo_id}")
+async def disconnect_repository(
+    repo_id: str,
+    user_id: str = Depends(get_current_user),
+):
+    """Disconnect/untrack a repository."""
+    from bson import ObjectId
+
+    user = await users_collection.find_one({"github_id": int(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    result = await repos_collection.delete_one({
+        "_id": ObjectId(repo_id),
+        "user_id": user["_id"],
+    })
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Repository not found")
+
+    return {"message": "Repository disconnected"}

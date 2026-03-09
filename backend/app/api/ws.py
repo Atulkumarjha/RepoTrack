@@ -1,11 +1,10 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.services.ws_manager import ConnectionManager 
+from app.services.ws_manager import manager
 
 from jose import jwt, JWTError
 from app.core.security import SECRET_KEY, ALGORITHM
 
 router = APIRouter()
-manager = ConnectionManager()
 
 @router.websocket("/ws/activities/{repo_id}")
 async def websocket_endpoint(websocket: WebSocket, repo_id: str):

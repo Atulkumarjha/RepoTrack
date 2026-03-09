@@ -58,23 +58,27 @@ async def get_integrations(
     return doc
 
 
-@router.post("/notifications")
-async def configure_notifications(
+@router.delete("/{repo_id}/{field}")
+async def remove_integration(
     repo_id: str,
-    slack_webhook: str | None = None,
-    discord_webhook: str | None = None,
+    field: str,
     user_id: str = Depends(get_current_user),
 ):
-    data = {
-        "repo_id": repo_id,
-        "slack_webhook": slack_webhook,
-        "discord_webhook": discord_webhook,
-    }
+    """Remove a specific integration field from notification settings."""
+    allowed_fields = [
+        "slack_webhook",
+        "discord_webhook",
+        "telegram_webhook",
+        "email_address",
+        "teams_webhook",
+        "custom_webhook",
+    ]
+    if field not in allowed_fields:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
     await database["notification_settings"].update_one(
         {"repo_id": repo_id},
-        {"$set": data},
-        upsert=True,
+        {"$unset": {field: ""}},
     )
-
-    return {"message": "Notification settings saved"}
+    return {"message": f"{field} removed"}
