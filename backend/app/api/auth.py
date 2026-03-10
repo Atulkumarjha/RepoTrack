@@ -37,7 +37,7 @@ async def github_callback(code: str):
         token_data = token_response.json()
         access_token = token_data.get("access_token")
         if not access_token:
-            return RedirectResponse(f"http://localhost:3000/login?error=oauth_failed")
+            return RedirectResponse(f"{settings.FRONTEND_URL}/login?error=oauth_failed")
         
         async with httpx.AsyncClient() as client:
             user_response = await client.get(
@@ -70,7 +70,7 @@ async def github_callback(code: str):
             
             # Redirect to frontend callback with JWT token
             return RedirectResponse(
-                f"http://localhost:3000/callback?token={token}&username={github_user['login']}"
+                f"{settings.FRONTEND_URL}/callback?token={token}&username={github_user['login']}"
             )
 
 

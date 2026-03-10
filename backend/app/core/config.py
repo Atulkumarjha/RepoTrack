@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_SECRET: str
     GITHUB_WEBHOOK_SECRET: str
     BACKEND_BASE_URL: str = "http://localhost:8000"
+    FRONTEND_URL: str = "http://localhost:3000"
     
     class Config:
         env_file = ".env"
