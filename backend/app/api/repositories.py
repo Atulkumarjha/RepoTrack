@@ -40,13 +40,14 @@ async def get_github_repos(github_id: int):
 
 async def create_github_webhook(user, repo_full_name: str):
     url = f"https://api.github.com/repos/{repo_full_name}/hooks"
+    backend_base_url = settings.BACKEND_BASE_URL.rstrip("/")
     
     payload = {
         "name": "web",
         "active": True,
         "events": ["push", "pull_request", "issues", "create", "delete"],
         "config": {
-            "url": f"{settings.BACKEND_BASE_URL}/webhooks/github",
+            "url": f"{backend_base_url}/webhooks/github",
             "content_type": "json",
             "secret": settings.GITHUB_WEBHOOK_SECRET,
         },

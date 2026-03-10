@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: repotrack-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: repotrack
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 43200
+      - key: BACKEND_BASE_URL
+        value: https://repotrack.onrender.com
+      - key: FRONTEND_URL
+        value: https://repo-track.vercel.app
+      - key: CORS_ORIGINS
+        value: ""

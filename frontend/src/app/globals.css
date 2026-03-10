@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --muted: #7d8590;
+  --border: #30363d;
+  --accent: #1f6feb;
+  --accent-hover: #388bfd;
+  --surface: #161b22;
+  --surface-hover: #1c2129;
+  --danger: #da3633;
+  --success: #238636;
+  --header: #010409;
+  --btn-primary: #238636;
+  --btn-primary-hover: #2ea043;
+  --badge-bg: #1f6feb26;
+  --badge-text: #388bfd;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* GitHub-style scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}

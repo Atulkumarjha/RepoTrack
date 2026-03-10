@@ -18,9 +18,18 @@ allowed_origins = [
     "http://127.0.0.1:3000",
 ]
 
-# Add production frontend URL if set
-if hasattr(settings, 'FRONTEND_URL') and settings.FRONTEND_URL:
-    allowed_origins.append(settings.FRONTEND_URL)
+# Add configured frontend URL
+if settings.FRONTEND_URL:
+    frontend_origin = settings.FRONTEND_URL.rstrip("/")
+    if frontend_origin not in allowed_origins:
+        allowed_origins.append(frontend_origin)
+
+# Optional extra origins via env var: "https://a.com,https://b.com"
+if settings.CORS_ORIGINS:
+    extra_origins = [origin.strip().rstrip("/") for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+    for origin in extra_origins:
+        if origin not in allowed_origins:
+            allowed_origins.append(origin)
 
 app.add_middleware(
     CORSMiddleware,
