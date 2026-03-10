@@ -62,7 +62,24 @@ Update your GitHub OAuth App settings:
 
 ## Backend Deployment
 
-### Option 1: Railway (Recommended for FastAPI + MongoDB)
+**Choose Your Backend Platform:**
+
+| Platform | WebSockets | Timeouts | MongoDB | Complexity | Cost |
+|----------|-----------|----------|---------|------------|------|
+| **Railway** | ✅ Yes | None | Included | Easy | ~$5/mo |
+| **Vercel** | ❌ No | 10s (60s Pro) | Atlas only | Easiest | Free |
+| **Render** | ✅ Yes | None | Separate | Easy | Free tier |
+
+💡 **Recommendation:** Use Railway for full features (WebSockets, real-time updates). See `VERCEL_BACKEND.md` for Vercel limitations.
+
+---
+
+### Option 1: Railway (Recommended for Full Features)
+
+✅ WebSockets supported  
+✅ No timeout limits  
+✅ Integrated MongoDB  
+✅ Background tasks  
 
 ```bash
 # Install Railway CLI
@@ -93,7 +110,24 @@ BACKEND_BASE_URL=https://your-railway-url.up.railway.app
 FRONTEND_URL=https://your-vercel-app.vercel.app
 ```
 
-### Option 2: Render
+### Option 2: Vercel (Serverless - No WebSockets)
+
+⚠️ **Limitations:** No WebSocket support, 10s timeout, cold starts
+
+See **VERCEL_BACKEND.md** for full guide.
+
+```bash
+cd backend
+vercel
+```
+
+Add environment variables in Vercel dashboard (must use MongoDB Atlas).
+
+### Option 3: Render
+
+✅ WebSockets supported  
+✅ No timeouts  
+✅ Free tier available  
 
 1. Create new Web Service at https://render.com
 2. Connect your GitHub repo
@@ -102,10 +136,10 @@ FRONTEND_URL=https://your-vercel-app.vercel.app
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
    - **Environment**: Python 3
-4. Add environment variables (same as above)
+4. Add environment variables (same as Railway)
 5. Add MongoDB via Render or use MongoDB Atlas
 
-### Option 3: MongoDB Atlas (Database)
+### Option 4: MongoDB Atlas (Database Only)
 
 If using external MongoDB:
 1. Create cluster at https://cloud.mongodb.com

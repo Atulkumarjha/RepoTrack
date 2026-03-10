@@ -43,7 +43,25 @@ Then **redeploy** from Vercel dashboard.
 
 ## ⚙️ Backend Deployment
 
-You'll also need to deploy your backend publicly (Railway/Render/AWS):
+**Option A: Vercel (Simplest - No WebSockets)**
+```bash
+cd backend
+vercel
+```
+⚠️ See `VERCEL_BACKEND.md` for limitations (no WebSockets, 10s timeout)
+
+**Option B: Railway (Full Features - Recommended)**
+```bash
+cd backend
+railway init
+railway add mongodb
+railway up
+```
+✅ Supports WebSockets, real-time updates, no timeouts
+
+---
+
+Choose **Vercel** for simplicity, **Railway** for full features.
 
 **Backend Environment Variables Required:**
 ```env
