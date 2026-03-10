@@ -103,8 +103,13 @@ def _format_github_event(event_type: str, payload: dict) -> str:
     """Convert a GitHub event type + payload into a human-readable message."""
     if event_type == "PushEvent":
         commits = payload.get("commits", [])
+        commit_count = payload.get("distinct_size")
+        if commit_count is None:
+            commit_count = payload.get("size")
+        if commit_count is None:
+            commit_count = len(commits)
         ref = payload.get("ref", "").split("/")[-1]
-        return f"Pushed {len(commits)} commit(s) to {ref}"
+        return f"Pushed {commit_count} commit(s) to {ref}"
 
     if event_type == "PullRequestEvent":
         action = payload.get("action", "")

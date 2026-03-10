@@ -7,11 +7,16 @@ def normalize_event(event_type: str, payload: dict):
 
     if event_type == "push":
         commits = payload.get("commits", [])
+        commit_count = payload.get("distinct_size")
+        if commit_count is None:
+            commit_count = payload.get("size")
+        if commit_count is None:
+            commit_count = len(commits)
         return {
             "repo_full_name": repo_full_name,
             "event_type": "push",
             "actor": payload.get("pusher", {}).get("name", "unknown"),
-            "message": f"Pushed {len(commits)} commit(s)",
+            "message": f"Pushed {commit_count} commit(s)",
             "payload": payload,
             "timestamp": timestamp,
         }
