@@ -36,8 +36,8 @@ async def save_integration(
 
     if update_data:
         await database["notification_settings"].update_one(
-            {"repo_id": body.repo_id},
-            {"$set": update_data},
+            {"repo_id": body.repo_id, "user_id": user_id},
+            {"$set": {**update_data, "user_id": user_id}},
             upsert=True,
         )
 
@@ -49,12 +49,13 @@ async def get_integrations(
     repo_id: str,
     user_id: str = Depends(get_current_user),
 ):
-    doc = await database["notification_settings"].find_one({"repo_id": repo_id})
+    doc = await database["notification_settings"].find_one({"repo_id": repo_id, "user_id": user_id})
     if not doc:
         return {}
 
     doc.pop("_id", None)
     doc.pop("repo_id", None)
+    doc.pop("user_id", None)
     return doc
 
 
@@ -78,7 +79,7 @@ async def remove_integration(
         raise HTTPException(status_code=400, detail=f"Invalid field: {field}")
 
     await database["notification_settings"].update_one(
-        {"repo_id": repo_id},
+        {"repo_id": repo_id, "user_id": user_id},
         {"$unset": {field: ""}},
     )
     return {"message": f"{field} removed"}

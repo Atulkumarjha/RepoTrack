@@ -9,7 +9,13 @@ from app.core.config import settings as app_settings
 from app.db.collections import repos_collection, activities_collection, database
 from app.services.github_events import normalize_event
 
-from app.services.notifications import send_slack_message, send_discord_message
+from app.services.notifications import (
+    send_slack_message,
+    send_discord_message,
+    send_teams_message,
+    send_telegram_message,
+    send_custom_webhook,
+)
 from app.services.message_formatter import format_activity_message
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
@@ -56,7 +62,8 @@ async def github_webhook(
 
     # Send notifications
     notification_settings = await database["notification_settings"].find_one({
-        "repo_id": repo_id
+        "repo_id": repo_id,
+        "user_id": str(repo["user_id"]),
     })
 
     if notification_settings:
@@ -67,5 +74,14 @@ async def github_webhook(
 
         if notification_settings.get("discord_webhook"):
             await send_discord_message(notification_settings["discord_webhook"], text)
+
+        if notification_settings.get("teams_webhook"):
+            await send_teams_message(notification_settings["teams_webhook"], text)
+
+        if notification_settings.get("telegram_webhook"):
+            await send_telegram_message(notification_settings["telegram_webhook"], text)
+
+        if notification_settings.get("custom_webhook"):
+            await send_custom_webhook(notification_settings["custom_webhook"], text, activity)
 
     return {"status": "received"}

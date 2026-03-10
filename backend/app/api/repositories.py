@@ -46,7 +46,7 @@ async def create_github_webhook(user, repo_full_name: str):
         "active": True,
         "events": ["push", "pull_request", "issues", "create", "delete"],
         "config": {
-            "url": "http://your-backend-url/webhooks/github",
+            "url": f"{settings.BACKEND_BASE_URL}/webhooks/github",
             "content_type": "json",
             "secret": settings.GITHUB_WEBHOOK_SECRET,
         },
@@ -101,11 +101,24 @@ async def connect_repository(
 
     result = await repos_collection.insert_one(repo_data)
 
-    return {
+    webhook_created = False
+    webhook_error = None
+    try:
+        await create_github_webhook(user, body.full_name)
+        webhook_created = True
+    except Exception as exc:
+        webhook_error = str(exc)
+
+    response = {
         "message": "Repository connected successfully",
         "repo": body.full_name,
         "repo_id": str(result.inserted_id),
+        "webhook_created": webhook_created,
     }
+    if webhook_error:
+        response["webhook_error"] = webhook_error
+
+    return response
 
 
 @router.get("/tracked")
