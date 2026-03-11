@@ -75,6 +75,14 @@ export default function RepositoriesPage() {
     fetchAll();
   }, [router]);
 
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("connected_repo");
+    localStorage.removeItem("connected_repo_name");
+    router.push("/login");
+  };
+
   const fetchAll = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -208,12 +216,20 @@ export default function RepositoriesPage() {
       <header className="bg-[#010409] border-b border-[#21262d] sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/RepoTrack_Logo.jpg" alt="RepoTrack" className="w-10 h-10 rounded-lg object-contain" />
+            <button onClick={() => router.push("/repositories")} aria-label="Go to repositories" className="rounded-lg">
+              <img src="/RepoTrack_Logo.jpg" alt="RepoTrack" className="w-10 h-10 rounded-lg object-contain" />
+            </button>
             <span className="text-sm font-semibold text-[#e6edf3]">{profile?.username || "User"}</span>
             <span className="text-[#484f58]">/</span>
             <span className="text-sm font-semibold text-[#e6edf3]">Repositories</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleSignOut}
+              className="text-xs font-medium text-[#e6edf3] bg-[#21262d] border border-[#30363d] px-3 py-1.5 rounded-md hover:bg-[#30363d] hover:border-[#8b949e] transition-colors"
+            >
+              Sign out
+            </button>
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full border border-[#30363d]" />
             ) : (

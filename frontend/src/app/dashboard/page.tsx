@@ -258,7 +258,9 @@ export default function DashboardPage() {
       <header className="bg-[#010409] border-b border-[#21262d] sticky top-0 z-50">
         <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/RepoTrack_Logo.jpg" alt="RepoTrack" className="w-10 h-10 rounded-lg object-contain" />
+            <button onClick={() => router.push("/repositories")} aria-label="Go to repositories" className="rounded-lg">
+              <img src="/RepoTrack_Logo.jpg" alt="RepoTrack" className="w-10 h-10 rounded-lg object-contain" />
+            </button>
             <div className="hidden sm:flex items-center bg-[#161b22] border border-[#30363d] rounded-md px-3 py-1.5 w-72">
               <svg className="w-4 h-4 text-[#484f58] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
               <span className="text-sm text-[#484f58]">Type <kbd className="text-[11px] border border-[#30363d] rounded px-1 py-0.5 text-[#7d8590]">/</kbd> to search</span>
@@ -539,9 +541,9 @@ export default function DashboardPage() {
                   <h3 className="text-sm font-medium text-[#e6edf3] mb-3">Tracked Repository</h3>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                      <button onClick={() => router.push("/repositories")} aria-label="Go to repositories" className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                         <img src="/RepoTrack_Logo.jpg" alt="RepoTrack" className="w-10 h-10 rounded-lg object-contain" />
-                      </div>
+                      </button>
                       <div>
                         <p className="text-sm font-medium text-[#e6edf3]">{repoName}</p>
                         <p className="text-xs text-[#484f58]">ID: {repoId}</p>
